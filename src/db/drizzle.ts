@@ -5,7 +5,7 @@ import { neon } from "@neondatabase/serverless";
 import { config } from "dotenv";
 
 
-config({ path: ".env.local" }); // or .env.local
+config({ path: ".env" }); // or .env.local
 
 const sql = neon(process.env.DATABASE_URL!);
 
