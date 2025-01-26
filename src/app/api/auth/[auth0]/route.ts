@@ -1,9 +1,14 @@
 import { db } from "@/db/drizzle";
 import { users } from "@/db/schema";
-import { handleAuth, handleCallback, handleLogin } from "@auth0/nextjs-auth0";
+import {
+  handleAuth,
+  handleCallback,
+  handleLogin,
+  Session,
+} from "@auth0/nextjs-auth0";
 import { eq } from "drizzle-orm";
 import { NextApiRequest, NextApiResponse } from "next";
-import { redirect } from "next/navigation";
+import { NextRequest } from "next/server";
 
 async function getOrCreateUser(email: string, auth_id: string) {
   const existingUser = await db
@@ -24,7 +29,7 @@ async function getOrCreateUser(email: string, auth_id: string) {
   return newUser;
 }
 
-const afterCallback = async (req: NextApiRequest, session: any, state: any) => {
+const afterCallback = async (req: NextRequest, session: Session) => {
   const user = await getOrCreateUser(session.user.email, session.user.sub);
   session.user.user_id = user.id;
   return {

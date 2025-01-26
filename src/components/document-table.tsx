@@ -71,7 +71,7 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<object>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -112,7 +112,11 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
       accessorKey: "url",
       header: "Link",
       cell: ({ row }) => (
-        <a target="_blank" href={row.getValue("url")} className="capitalize text-blue-600">
+        <a
+          target="_blank"
+          href={row.getValue("url")}
+          className="capitalize text-blue-600"
+        >
           {row.getValue("url")}
         </a>
       ),
@@ -127,7 +131,7 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }) => {
+      cell: () => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

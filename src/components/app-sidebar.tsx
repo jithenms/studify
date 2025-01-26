@@ -1,4 +1,4 @@
-import { BookOpen, MessageSquareTextIcon, Zap } from "lucide-react";
+import { BookOpen, MessageSquareTextIcon } from "lucide-react";
 
 import {
   Sidebar,

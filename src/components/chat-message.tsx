@@ -1,9 +1,6 @@
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { FileText, Mic, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "./ui/badge";
+import { FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 export interface Message {
