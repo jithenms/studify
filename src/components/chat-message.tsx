@@ -1,23 +1,16 @@
+import { getPresignedUrl } from "@/app/actions";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { Message } from "@/types";
 import { FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-export interface Message {
-  role: "You" | "AI";
-  content: string;
-  resources?: {
-    title: string;
-    url: string;
-    similarity: number;
-  }[];
-}
-
 interface ChatMessageProps {
+  userId: number;
   message: Message;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ userId, message }: ChatMessageProps) {
   return (
     <div
       className={`flex gap-3 p-4 ${
@@ -35,7 +28,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <Card
               key={index}
               className="p-2 cursor-pointer"
-              onClick={() => window.open(resource.url)}
+              onClick={async (e) => {
+                e.preventDefault();
+                const fileName: string = resource.title;
+                const url = await getPresignedUrl(userId, fileName);
+                window.open(url, "_blank");
+              }}
             >
               <FileText className="w-4 h-4" />
               <p className="text-xs text-primary font-medium">

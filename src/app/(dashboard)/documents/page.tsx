@@ -1,23 +1,24 @@
 import { getDocuments } from "@/app/actions";
 import DocumentTable from "@/components/document-table";
-import { formatBytes } from "@/utils";
-import { getSession } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
 
 export default async function DocumentsPage() {
-  const session = await getSession();
+  const session = await auth0.getSession();
 
-  const documentRecords = await getDocuments(session?.user.user_id as number);
+  if (!session) {
+    redirect("/auth/login");
+  }
 
-  const documentsData = documentRecords.map((document) => ({
-    ...document,
-    size: formatBytes(document.size),
-    created_at: new Date(document.created_at).toLocaleDateString(),
-  }));
+  const initialDocuments = await getDocuments(session.user.user_id);
 
   return (
     <div className="w-full">
       <h1 className="text-xl font-semibold text-gray-800">Documents</h1>
-      <DocumentTable documents={documentsData} />
+      <DocumentTable
+        userId={session.user.user_id}
+        initialDocuments={initialDocuments}
+      />
     </div>
   );
 }

@@ -42,15 +42,18 @@ export default function HomePage() {
               <div className="w-full max-w-sm space-y-2">
                 <div className="flex space-x-2">
                   <div className="flex w-full justify-center gap-4">
-                    <Link
+                    <a
                       className={buttonVariants({ variant: "outline" })}
-                      href="/api/auth/login"
+                      href="/auth/login"
                     >
                       Login
-                    </Link>
-                    <Link className={buttonVariants()} href="/api/auth/login">
+                    </a>
+                    <a
+                      className={buttonVariants()}
+                      href="/auth/login?screen_hint=signup"
+                    >
                       Sign Up
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </div>

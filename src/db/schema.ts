@@ -20,7 +20,6 @@ export const documents = pgTable(
   {
     id: serial("id").primaryKey(),
     title: text("title").notNull(),
-    url: text("url").notNull(),
     content: text("content").default(""),
     size: integer("size").notNull(),
     embedding: vector("embedding", { dimensions: 1536 }),
