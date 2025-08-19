@@ -1,7 +1,7 @@
 # Studify - AI-Powered Study Assistant
  By simply uploading your notes, lectures, and documents, Studify provides personalized, human-like explanations that adapt to your learning style and directly cite information from your documents. 
  
- ![image](https://github.com/user-attachments/assets/f1f484ce-11e1-4569-a93c-8581f2852f57)
+ ![image](https://github.com/user-attachments/assets/ee505487-8328-47cf-9dcf-338f868d948c)
 
  ## What it does
  Studify is an AI-powered study assistant that turns your notes, lectures, and problem sets into actionable learning tools in seconds. By uploading your study materials, the tool provides human-like, personalized explanations that adapt to your individual learning style. Whether it's breaking down complex concepts, offering simplified explanations, or guiding you through practice problems, Studify helps students optimize their study sessions and improve retention.
