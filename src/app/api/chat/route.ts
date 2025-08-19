@@ -5,11 +5,6 @@ import { answerQuestion, generateEmbedding } from "@/lib/chat";
 import { and, cosineDistance, desc, eq, gt, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// allow for longer max duration (vercel free plan limits)
-export const config = {
-  runtime: "edge",
-};
-
 export async function POST(req: Request) {
   const body = await req.json();
   const { query, userId, history } = body;
