@@ -1,5 +1,5 @@
 import { documents } from "./db/schema";
-import { DocumentType } from "./lib/types";
+import { DocumentType } from "@/types";
 
 export const formatBytes = (bytes: number) => {
   const units = ["B", "KB", "MB", "GB", "TB", "PB"];

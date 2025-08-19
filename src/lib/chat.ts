@@ -1,6 +1,6 @@
 import { getPresignedUrl } from "@/app/actions";
 import OpenAI from "openai";
-import { Message } from "./types";
+import { Message } from "@/types";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
