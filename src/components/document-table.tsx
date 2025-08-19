@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { Loader2, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,12 +41,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { uploadImage } from "@/app/actions";
-import { useUser } from "@auth0/nextjs-auth0/client";
+import { deleteDocument, getPresignedUrl, uploadDocument } from "@/app/actions";
+import { DocumentType } from "@/lib/types";
 
-export default function DocumentTable({ documents }: { documents: object[] }) {
-  const { user, isLoading, error } = useUser();
-
+export default function DocumentTable({
+  userId,
+  initialDocuments,
+}: {
+  userId: number;
+  initialDocuments: DocumentType[];
+}) {
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [documents, setDocuments] =
+    React.useState<DocumentType[]>(initialDocuments);
   const [isOpen, setIsOpen] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
 
@@ -58,10 +65,21 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  async function handleSubmit(formData: FormData) {
-    if (file) formData.set("file", file);
-    await uploadImage(formData, user?.user_id as number);
-    setIsOpen(false);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      const formData = new FormData(e.currentTarget);
+      if (file) formData.set("file", file);
+      const record = await uploadDocument(formData, userId);
+      setDocuments((prev) => [...prev, record]);
+      setIsOpen(false);
+    } catch (err) {
+      alert(err);
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,7 +89,7 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
     }
   };
 
-  const columns: ColumnDef<object>[] = [
+  const columns: ColumnDef<DocumentType>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -113,11 +131,15 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
       header: "Link",
       cell: ({ row }) => (
         <a
-          target="_blank"
-          href={row.getValue("url")}
-          className="capitalize text-blue-600"
+          onClick={async (e) => {
+            e.preventDefault();
+            const fileName: string = row.getValue("title");
+            const url = await getPresignedUrl(userId, fileName);
+            window.open(url, "_blank");
+          }}
+          className="cursor-pointer capitalize text-blue-600"
         >
-          {row.getValue("url")}
+          {row.getValue("title")}
         </a>
       ),
     },
@@ -131,7 +153,10 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
     {
       id: "actions",
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
+        const fileName: string = row.getValue("title");
+        const docId: number = row.original.id;
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -141,8 +166,31 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>View</DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const url = await getPresignedUrl(userId, fileName);
+                  window.open(url, "_blank");
+                }}
+              >
+                View
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const confirmed = window.confirm(
+                    `Are you sure you want to delete "${fileName}"?`
+                  );
+                  if (!confirmed) return;
+
+                  await deleteDocument(docId, userId, fileName);
+                  setDocuments((prev) =>
+                    prev.filter((doc) => doc.id !== docId)
+                  );
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -169,10 +217,6 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
-
-  if (error) return <div>{error.message}</div>;
-
   return (
     <div>
       <div className="flex items-center py-4">
@@ -193,7 +237,7 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
               <DialogHeader>
                 <DialogTitle>Upload File</DialogTitle>
               </DialogHeader>
-              <form action={handleSubmit}>
+              <form onSubmit={handleSubmit}>
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="file">File</Label>
@@ -206,7 +250,12 @@ export default function DocumentTable({ documents }: { documents: object[] }) {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Upload</Button>
+                  <Button type="submit" disabled={isLoading || !file}>
+                    <>
+                      {isLoading && <Loader2 className="animate-spin" />}
+                      Upload
+                    </>
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
