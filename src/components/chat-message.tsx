@@ -1,7 +1,7 @@
 import { getPresignedUrl } from "@/app/actions";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Message } from "@/lib/types";
+import { Message } from "@/types";
 import { FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 

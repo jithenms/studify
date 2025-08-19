@@ -3,7 +3,7 @@
 import { db } from "@/db/drizzle";
 import { documents } from "@/db/schema";
 import { s3 } from "@/lib/s3";
-import { generateEmbedding, analyzeNote, answerQuestion } from "@/lib/chat";
+import { generateEmbedding, analyzeNote } from "@/lib/chat";
 import { formatDocument } from "@/utils";
 import {
   DeleteObjectCommand,
@@ -11,9 +11,8 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { and, cosineDistance, desc, eq, gt, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import pdf from "pdf-parse";
-import { Message } from "@/lib/types";
 
 export async function getDocuments(userId: number) {
   const documentRecords = await db
@@ -75,44 +74,6 @@ export async function deleteDocument(
       Key: s3Key,
     })
   );
-}
-
-export async function generateResponse(
-  query: string,
-  userId: number,
-  history: Message[]
-) {
-  const embedding = await generateEmbedding(query);
-
-  const similarity = sql<number>`1 - (${cosineDistance(
-    documents.embedding,
-    embedding
-  )})`;
-
-  const similarDocuments = await db
-    .select({
-      name: documents.title,
-      content: documents.content,
-      similarity,
-    })
-    .from(documents)
-    .where(and(gt(similarity, 0.3), eq(documents.user_id, userId)))
-    .orderBy((t) => desc(t.similarity))
-    .limit(3);
-
-  const documentMsgs: Message[] = similarDocuments.map((doc) => ({
-    role: "AI",
-    content: `Title: ${doc.name}\nContent: ${doc.content}`,
-  }));
-
-  const conversation: Message[] = [...history, ...documentMsgs];
-
-  const response = await answerQuestion(query, conversation);
-
-  return {
-    message: response,
-    documents: similarDocuments,
-  };
 }
 
 export const getPresignedUrl = async (userId: number, fileName: string) => {

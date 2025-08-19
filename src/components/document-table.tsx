@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { deleteDocument, getPresignedUrl, uploadDocument } from "@/app/actions";
-import { DocumentType } from "@/lib/types";
+import { DocumentType } from "@/types";
 
 export default function DocumentTable({
   userId,

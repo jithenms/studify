@@ -11,8 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { LucideArrowUp, Loader2, Square, ZapIcon } from "lucide-react";
 import { User } from "@auth0/nextjs-auth0/types";
-import { generateResponse } from "@/app/actions";
-import { Message } from "@/lib/types";
+import { ChatResponse, Message } from "@/types";
 
 export default function ChatClient({
   user,
@@ -42,27 +41,35 @@ export default function ChatClient({
 
     setLoading(true);
 
-    const userMsg: Message = {
+    const userMessage: Message = {
       role: "You",
       content: query,
       resources: [],
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await generateResponse(query, user.user_id, [
-        ...messages,
-        userMsg,
-      ]);
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query,
+          userId: user.user_id,
+          history: [...messages, userMessage],
+        }),
+      });
+      const data: ChatResponse = await response.json();
 
       setMessages((prev) => [
         ...prev,
         {
           role: "AI",
-          content: response.message!,
-          resources: response.documents.map((doc) => ({
-            title: doc.name,
+          content: data.message!,
+          resources: data.documents.map((doc) => ({
+            title: doc.title,
             similarity: doc.similarity,
           })),
         },
